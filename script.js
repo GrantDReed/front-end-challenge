@@ -4,30 +4,46 @@ function domobj(){
   self.products   = [];
 
   self.getproducts = function(url){
-    $.getJSON(url, function(response){
-        for(i=0; i<response.sales.length ; i++){
-          self.products.push( new productobj(response.sales[i], i)  );
-        }
+    return $.getJSON(url, function(response){
+               for(i=0; i<response.sales.length ; i++){
+                 self.products.push( new productobj(response.sales[i]));
+               }
+           })
+  }
+
+  self.getproducttemplate = function(){
+    return $.get('product-template.html', function(template){
     });
   }
-    
-  self.updateproducthtml = function(){
+
+  self.updateproducthtml = function(template){
     for( i=0; i< self.products.length ; i++){
-      self.products[i].updatehtml();
+      self.products[i].updatehtml(template);
     }
   }
-  
+
   self.updatedom = function(){
     var i=0
     thishtml='';
     for( i=0; i< self.products.length ; i++){
-      if (i % 3 == 0 ){  thishtml += "<div class='row'>"; console.log("START") }
       thishtml += self.products[i].htmlview;
-      if ((i % 3 == 2) || i == (self.products.length-1) ){thishtml += "</div>";console.log("FINISH")}
     }
-    $("#content").append(thishtml)
+    $("#content").append('<div class="row">' + thishtml + '</div>')
   }
-  
+
+  self.removeProduct = function(target){
+    $(target).fadeOut('normal', function(){
+      $(target).remove();
+    });
+  }
+
+  self.setRemoveListener = function(){
+    $(".product").click(function(event) {
+      if (event.target.nodeName == 'I') {
+        self.removeProduct(event.currentTarget);
+      }
+    });
+  }
 }
 
 function productobj(product, i){
@@ -36,19 +52,15 @@ function productobj(product, i){
   self.title        = product.name
   self.tagline      = product.tagline
   self.url          = product.url
+  self.description  = product.description
   self.htmlview     = ""
-  self.index        = i
-  self.custom_class = "col"+ ((i % 3) +1)
-  
-  self.updatehtml= function(){
-    $.get('product-template.html', function(template){
-      self.htmlview = template.replace('{image}', self.photo).replace('{title}', self.title).replace('{tagline}', self.tagline).replace('{url}', self.url).replace('{custom_class}', self.custom_class);
-    });
+
+  self.updatehtml= function(template){
+    self.htmlview = template.replace('{image}', self.photo).replace('{description}', self.description).replace('{title}', self.title).replace('{tagline}', self.tagline).replace('{url}', self.url);
   }
 }
 
-
 var page=new domobj();
-page.getproducts('data.json');
-setTimeout("console.log('building html');page.updateproducthtml();",20);
-setTimeout("page.updatedom()",50)
+page.getproducts('data.json').then(page.getproducttemplate).then(function(template) {
+  page.updateproducthtml(template);
+}).then(page.updatedom).done(page.setRemoveListener)

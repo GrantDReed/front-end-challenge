@@ -1,9 +1,19 @@
-<div class="product-container {custom_class}">
-  <a href="{url}">
-    <img src="{image}">
-    <div class="description">
-      <div class="title">{title}</div>
-      <div class="tagline">{tagline}</div>
+<div class="col-md-4 product">
+  <div class="product-container border border-secondary position-relative">
+    <div class="link-container">
+      <a href="{url}">
+        <img src="{image}">
+        <div class="description text-center">
+          <div class="title">{title}</div>
+          <div class="tagline">{tagline}</div>
+        </div>
+        <div class="overlay">
+          <p>{description}</p>
+        </div>
+      </a>
     </div>
-  </a>
+    <div class="remove position-absolute">
+      <i class="fas fa-times-circle fa-2x"></i>
+    </div>
+  </div>
 </div>
